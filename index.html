@@ -455,7 +455,7 @@ document.getElementById("lede").textContent =
 
 // ---- Config (set after deploying the Apps Script web app) ----
 // Paste the web app /exec URL here to send every vote to the shared Google Sheet.
-const FEEDBACK_URL = "";
+const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbyFo81pj3qj2LpCQTDDoV7f7nBKu3mtXwAhe_36WFgiJxEj6jdsVpYAGY2oe5PGPg95/exec";
 
 // ---- Feedback loop (trains future editions) ----
 function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48); }
@@ -470,7 +470,7 @@ function recordFeedback(fid, agency, title, source, vote){
   // run can read aggregated signal and tune sources/topics per agency over time.
   if (FEEDBACK_URL) {
     try {
-      const body = new URLSearchParams({ agency: agency, title: title, source: source||"", vote: store[fid].vote||"clear", ts: String(Date.now()) });
+      const body = new URLSearchParams({ agency: agency, title: title, source: (source||"").split(" · ")[0], vote: store[fid].vote||"clear", ts: String(Date.now()) });
       fetch(FEEDBACK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() });
     } catch(e) {}
   }
