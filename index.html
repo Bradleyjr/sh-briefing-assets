@@ -174,11 +174,6 @@ const AGENCIES = [
     "id": "oust",
     "name": "Oust",
     "disc": "Digital & social for the chronically online — entertainment & music lean."
-  },
-  {
-    "id": "sh",
-    "name": "Summit House",
-    "disc": "Exec view — the agency business, holding companies, AI & M&A."
   }
 ];
 
@@ -329,15 +324,6 @@ const ITEMS = {
       "p": "CMA Fest unveiled its 2026 sponsor roster with new on-site activations including the Wrangler Remix Stage, SONIC's 'Thirst Trap' in Fan Alley, Alani Nu's two-story Pony Up Club, and Sam's Club's Win Summer experience.",
       "w": "The live-event blueprint for branded country activations in Nashville right now, directly relevant to Opry/Ryman and country-talent client work heading into festival season."
     }
-  ],
-  "sh": [
-    {
-      "t": "OpenAI's UK ads trial invites the four holdcos to spend more than £1m",
-      "m": "Campaign · Jun 1",
-      "u": "https://www.campaignlive.co.uk/article/openai-uk-ads-trial-four-holdcos-invited-spend-1m/1959860",
-      "p": "OpenAI opened its ChatGPT ads trial to the UK, inviting the four major holding companies (Dentsu, Omnicom, Publicis and WPP) to commit upward of £1m in test spend on commercial-intent inventory.",
-      "w": "Holdcos are being positioned as OpenAI's default on-ramp to a new AI-native ad channel, deepening agency dependence on, and leverage with, the frontier platforms reshaping media budgets."
-    }
   ]
 };
 
@@ -346,7 +332,7 @@ const contentEl = document.getElementById("content");
 const total = Object.values(ITEMS).reduce((n,a)=>n+a.length,0);
 document.getElementById("mast-date").textContent = EDITION;
 document.getElementById("lede").textContent =
-  "Seven agencies, one pulse. " + total + " stories researched and tied back to what each team is actually selling.";
+  "Your ecosystem, one pulse. " + total + " stories researched and tied back to what each team is actually selling.";
 
 // ---- Config (set after deploying the Apps Script web app) ----
 // Paste the web app /exec URL here to send every vote to the shared Google Sheet.
