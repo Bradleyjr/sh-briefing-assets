@@ -42,17 +42,24 @@ h1.headline {
 }
 .lede { font-size: 14px; color: var(--graphite); margin-top: 14px; max-width: 56ch; }
 
-/* ---- Tabs ---- */
+/* ---- Tabs (sticky) ---- */
 .tabs { display: flex; flex-wrap: wrap; gap: 2px; margin: 30px 0 26px;
-  border-bottom: 1px solid var(--hair); }
+  border-bottom: 1px solid var(--hair); position: sticky; top: 0; z-index: 50;
+  background: var(--archive); padding-top: 10px;
+  transition: box-shadow .3s ease, border-color .3s ease; }
+.tabs.stuck { box-shadow: 0 8px 22px -14px rgba(6,6,6,.30); border-bottom-color: rgba(76,76,76,.28); }
 .tab { appearance: none; border: none; background: transparent; cursor: pointer; font-family: var(--sans);
   font-size: 11.5px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--graphite);
-  padding: 11px 14px; position: relative; white-space: nowrap; transition: color .15s; }
+  padding: 11px 14px; position: relative; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px; transition: color .35s ease; }
 .tab:hover { color: var(--ink); }
 .tab.active { color: var(--ink); }
-.tab.active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px;
-  background: var(--carmine); }
-.tab .cnt { font-size: 10px; color: var(--blueprint); margin-left: 6px; font-weight: 700; vertical-align: super; }
+/* count sits visually raised but no longer alters the line-box, so every tab label aligns */
+.tab .cnt { font-size: 10px; color: var(--blueprint); font-weight: 700;
+  display: inline-block; transform: translateY(-0.4em); }
+/* one sliding underline element, positioned by GSAP (replaces the static .active::after) */
+.tab-underline { position: absolute; top: 0; left: 0; width: 0; height: 2px;
+  background: var(--carmine); pointer-events: none; }
 
 /* ---- Agency head ---- */
 .agency-head { margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--hair); }
@@ -75,12 +82,16 @@ h1.headline {
 .card p { font-size: 14px; color: #2b2a27; margin-bottom: 13px; }
 .why { font-size: 13.5px; font-style: italic; color: var(--graphite);
   border-left: 2px solid var(--carmine); padding: 1px 0 1px 14px; }
+.card { will-change: transform; }
+@media (prefers-reduced-motion: reduce) {
+  .tabs, .tab, .card, .card h3 a, .fb-btn { transition: none !important; }
+}
 
 .fb { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hair); flex-wrap: wrap; }
 .fb-q { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--graphite); font-weight: 700; margin-right: 2px; }
 .fb-btn { appearance: none; cursor: pointer; font-family: var(--sans); font-size: 11px; font-weight: 600;
   letter-spacing: .3px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--hair);
-  background: transparent; color: var(--graphite); transition: all .15s; }
+  background: transparent; color: var(--graphite); transition: color .15s, background .15s, border-color .15s; }
 .fb-btn:hover { border-color: var(--graphite); color: var(--ink); }
 .fb-btn.up.active { background: var(--midnight); border-color: var(--midnight); color: #fff; }
 .fb-btn.down.active { background: var(--carmine); border-color: var(--carmine); color: #fff; }
@@ -90,6 +101,7 @@ footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--hair);
 footer .mark { font-family: var(--serif); font-style: italic; color: var(--ink); }
 .hidden { display: none; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 </head>
 <body>
 <header class="masthead">
@@ -453,6 +465,52 @@ document.getElementById("mast-date").textContent = EDITION;
 document.getElementById("lede").textContent =
   "Your ecosystem, one pulse. " + total + " stories researched and tied back to what each team is actually selling.";
 
+/* ---- Motion (GSAP): refined + smooth; degrades gracefully if GSAP is blocked or reduced-motion is on ---- */
+const HAS_GSAP = !!window.gsap;
+let reduceMotion = false;
+try { reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){}
+const ANIMATE = HAS_GSAP && !reduceMotion;
+let underline = null;       // sliding active-tab indicator
+let firstPaint = true;
+
+function moveUnderline(animate){
+  if (!underline) return;
+  const active = tabsEl.querySelector(".tab.active");
+  if (!active) return;
+  const x = active.offsetLeft, y = active.offsetTop + active.offsetHeight - 2, w = active.offsetWidth;
+  if (ANIMATE && animate) gsap.to(underline, { x: x, y: y, width: w, duration: 0.75, ease: "power4.out", overwrite: true });
+  else if (HAS_GSAP) gsap.set(underline, { x: x, y: y, width: w });
+  else { underline.style.transform = "translate(" + x + "px," + y + "px)"; underline.style.width = w + "px"; }
+}
+
+function attachCardHovers(){
+  if (!ANIMATE) return;
+  gsap.utils.toArray("#content .card").forEach(function(card){
+    card.addEventListener("mouseenter", function(){
+      gsap.to(card, { y: -4, boxShadow: "0 18px 38px -22px rgba(6,6,6,.34)", duration: 0.55, ease: "power3.out", overwrite: true });
+    });
+    card.addEventListener("mouseleave", function(){
+      gsap.to(card, { y: 0, boxShadow: "0 0px 0px 0px rgba(6,6,6,0)", duration: 0.7, ease: "power3.out", overwrite: true });
+    });
+  });
+}
+
+function revealCards(){
+  if (!ANIMATE) return;
+  const cards = gsap.utils.toArray("#content .card");
+  gsap.killTweensOf(cards);
+  // smooth staggered entrance that always completes — no dependency on scroll position
+  gsap.from(cards, { opacity: 0, y: 22, duration: 0.85, ease: "power3.out",
+    stagger: { amount: Math.min(0.7, cards.length * 0.06) }, clearProps: "opacity,transform", overwrite: true });
+}
+
+function afterRender(){
+  moveUnderline(!firstPaint);
+  firstPaint = false;
+  attachCardHovers();
+  revealCards();
+}
+
 // ---- Config (set after deploying the Apps Script web app) ----
 // Paste the web app /exec URL here to send every vote to the shared Google Sheet.
 const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbyFo81pj3qj2LpCQTDDoV7f7nBKu3mtXwAhe_36WFgiJxEj6jdsVpYAGY2oe5PGPg95/exec";
@@ -509,7 +567,7 @@ function render(id) {
   document.querySelectorAll(".tab").forEach(t =>
     t.classList.toggle("active", t.dataset.id === id));
   try { localStorage.setItem("sh_brief_tab", id); } catch(e) {}
-  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  afterRender();   // Option A: no scroll jump — content swaps in place; the sticky tab bar stays put
 }
 
 AGENCIES.forEach(a => {
@@ -517,8 +575,28 @@ AGENCIES.forEach(a => {
   b.className = "tab"; b.dataset.id = a.id;
   const cnt = a.id === "all" ? "" : '<span class="cnt">' + (ITEMS[a.id]||[]).length + '</span>';
   b.innerHTML = a.name + cnt;
-  b.onclick = () => render(a.id);
+  b.onclick = () => {
+    if (ANIMATE) gsap.fromTo(b, { scale: 0.96 }, { scale: 1, duration: 0.55, ease: "power3.out" });
+    render(a.id);
+  };
   tabsEl.appendChild(b);
+});
+
+// sliding active-tab indicator (positioned by moveUnderline)
+underline = document.createElement("span");
+underline.className = "tab-underline";
+tabsEl.appendChild(underline);
+
+// sticky tab bar: fade a shadow in only once it pins to the top
+const setStuck = () => tabsEl.classList.toggle("stuck", tabsEl.getBoundingClientRect().top <= 0);
+window.addEventListener("scroll", setStuck, { passive: true });
+setStuck();
+
+// realign the underline if the tabs reflow/wrap on resize
+let _rT;
+window.addEventListener("resize", () => {
+  clearTimeout(_rT);
+  _rT = setTimeout(() => { moveUnderline(false); }, 120);
 });
 
 contentEl.addEventListener("click", function(e){
@@ -529,6 +607,7 @@ contentEl.addEventListener("click", function(e){
   row.querySelectorAll(".fb-btn").forEach(b => b.classList.toggle("active", b.dataset.v === vote));
   row.querySelector(".fb-thanks").textContent =
     vote === "up" ? "Got it — more like this." : vote === "down" ? "Noted — we'll dial it back." : "";
+  if (ANIMATE && vote) gsap.fromTo(btn, { scale: 0.85 }, { scale: 1, duration: 0.6, ease: "power3.out" });
 });
 
 let start = "all";
