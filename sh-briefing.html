@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Summit House — Daily Industry Briefing</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #060606;
+  --archive: #f6f6f6;
+  --grain: #e7e7e7;
+  --graphite: #4c4c4c;
+  --blueprint: #7aa0ac;
+  --midnight: #375058;
+  --carmine: #9e2b25;
+  --paper: #fbfaf8;
+  --hair: rgba(76,76,76,.16);
+  --serif: "IvyPresto Display","IvyPresto Headline",ivypresto-display,"Didot","Bodoni 72","Playfair Display",Georgia,"Times New Roman",serif;
+  --sans: "Inter Tight",InterTight,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--sans); background: var(--archive); color: var(--ink);
+  line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Masthead ---- */
+.masthead { background: var(--ink); color: #fff; padding: 26px 0 24px; }
+.masthead .inner { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+.logo { height: 30px; width: auto; display: block; margin-bottom: 20px; }
+.logo path { fill: #fff; }
+.mast-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  border-top: 1px solid rgba(255,255,255,.16); padding-top: 16px; }
+.mast-kicker { font-size: 11px; letter-spacing: 3.5px; text-transform: uppercase; color: #c9c4bb; font-weight: 500; }
+.mast-date { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #8f8a82; }
+
+.wrap { max-width: 940px; margin: 0 auto; padding: 34px 24px 70px; }
+h1.headline {
+  font-family: var(--serif); font-weight: 300; font-size: 44px; line-height: 1.04;
+  letter-spacing: -0.5px; color: var(--ink); max-width: 16ch;
+}
+.lede { font-size: 14px; color: var(--graphite); margin-top: 14px; max-width: 56ch; }
+
+/* ---- Tabs (sticky) ---- */
+.tabs { display: flex; flex-wrap: wrap; gap: 2px; margin: 30px 0 26px;
+  border-bottom: 1px solid var(--hair); position: sticky; top: 0; z-index: 50;
+  background: var(--archive); padding-top: 10px;
+  transition: box-shadow .3s ease, border-color .3s ease; }
+.tabs.stuck { box-shadow: 0 8px 22px -14px rgba(6,6,6,.30); border-bottom-color: rgba(76,76,76,.28); }
+.tab { appearance: none; border: none; background: transparent; cursor: pointer; font-family: var(--sans);
+  font-size: 11.5px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--graphite);
+  padding: 11px 14px; position: relative; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px; transition: color .35s ease; }
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--ink); }
+/* count sits visually raised but no longer alters the line-box, so every tab label aligns */
+.tab .cnt { font-size: 10px; color: var(--blueprint); font-weight: 700;
+  display: inline-block; transform: translateY(-0.4em); }
+/* one sliding underline element, positioned by GSAP (replaces the static .active::after) */
+.tab-underline { position: absolute; top: 0; left: 0; width: 0; height: 2px;
+  background: var(--carmine); pointer-events: none; }
+
+/* ---- Agency head ---- */
+.agency-head { margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--hair); }
+.agency-head h2 { font-family: var(--serif); font-weight: 300; font-size: 30px; letter-spacing: -0.3px; }
+.agency-head .disc { font-size: 13px; color: var(--graphite); margin-top: 6px; max-width: 64ch; }
+
+.group-label { font-family: var(--sans); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--carmine); font-weight: 700; margin: 34px 0 14px; display: flex; align-items: center; gap: 12px; }
+.group-label::after { content: ""; flex: 1; height: 1px; background: var(--hair); }
+
+/* ---- Cards ---- */
+.card { background: var(--paper); border: 1px solid var(--hair); border-radius: 3px;
+  padding: 20px 22px; margin-bottom: 14px; }
+.card .meta { font-size: 10.5px; color: var(--graphite); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; margin-bottom: 9px; }
+.card h3 { font-family: var(--serif); font-weight: 400; font-size: 21px; line-height: 1.22; margin-bottom: 9px; letter-spacing: -0.2px; }
+.card h3 a { color: var(--ink); text-decoration: none; background-image: linear-gradient(var(--carmine),var(--carmine));
+  background-size: 0% 1px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size .2s; }
+.card h3 a:hover { color: var(--carmine); background-size: 100% 1px; }
+.card p { font-size: 14px; color: #2b2a27; margin-bottom: 13px; }
+.why { font-size: 13.5px; font-style: italic; color: var(--graphite);
+  border-left: 2px solid var(--carmine); padding: 1px 0 1px 14px; }
+.card { will-change: transform; }
+@media (prefers-reduced-motion: reduce) {
+  .tabs, .tab, .card, .card h3 a, .fb-btn { transition: none !important; }
+}
+
+.fb { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hair); flex-wrap: wrap; }
+.fb-q { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--graphite); font-weight: 700; margin-right: 2px; }
+.fb-btn { appearance: none; cursor: pointer; font-family: var(--sans); font-size: 11px; font-weight: 600;
+  letter-spacing: .3px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--hair);
+  background: transparent; color: var(--graphite); transition: color .15s, background .15s, border-color .15s; }
+.fb-btn:hover { border-color: var(--graphite); color: var(--ink); }
+.fb-btn.up.active { background: var(--midnight); border-color: var(--midnight); color: #fff; }
+.fb-btn.down.active { background: var(--carmine); border-color: var(--carmine); color: #fff; }
+.fb-thanks { font-size: 11px; font-style: italic; color: var(--midnight); }
+footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--hair);
+  font-size: 11px; letter-spacing: .3px; color: var(--graphite); text-align: center; line-height: 1.7; }
+footer .mark { font-family: var(--serif); font-style: italic; color: var(--ink); }
+.hidden { display: none; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+</head>
+<body>
+<header class="masthead">
+  <div class="inner">
+    <svg class="logo" viewBox="0 0 979 180" xmlns="http://www.w3.org/2000/svg" aria-label="Summit House">
+      <path d="M103.851 0.00390921C104.172 0.00393117 104.431 0.263481 104.431 0.583988V2.32325C104.431 2.64379 104.172 2.9043 103.851 2.9043H98.9195C98.7594 2.90444 98.6296 3.03416 98.6296 3.19434V142.197C98.6296 156.531 104.323 172.713 121.836 172.668C138.79 172.623 145.043 156.072 145.043 142.197V3.19434C145.043 3.03417 144.913 2.90446 144.753 2.9043H139.821C139.501 2.9043 139.241 2.64379 139.241 2.32325V0.583988C139.241 0.263483 139.501 0.00390921 139.821 0.00390921H154.615C154.935 0.00390921 155.195 0.263484 155.195 0.583988V2.32325C155.195 2.64379 154.935 2.9043 154.615 2.9043H149.683C149.523 2.90453 149.394 3.03421 149.394 3.19434V145.1C149.382 153.625 146.679 161.63 142.142 168.316C136.09 177.226 124.916 180.566 114.584 179.923C100.888 179.073 90.0982 170.492 86.2537 157.143C84.4879 151.01 84.1256 144.665 84.1256 137.845V3.25586C84.1256 3.09563 83.9958 2.96588 83.8357 2.96583H78.906C78.5858 2.96583 78.3264 2.70608 78.3262 2.38575L78.3242 0.583011C78.324 0.262296 78.5844 0.00193411 78.905 0.00195608L103.851 0.00390921Z"/>
+      <path d="M772.46 0.00390921C772.781 0.00404292 773.04 0.26355 773.04 0.583988V2.32325C773.04 2.64371 772.781 2.90417 772.46 2.9043H767.529C767.368 2.90431 767.239 3.03407 767.239 3.19434V142.197C767.239 156.531 772.933 172.713 790.445 172.668C807.399 172.623 813.652 156.072 813.652 142.197V3.19434C813.652 3.03407 813.521 2.9043 813.361 2.9043H808.43C808.11 2.9043 807.849 2.64379 807.849 2.32325V0.583988C807.85 0.263483 808.11 0.00390921 808.43 0.00390921H823.224C823.545 0.00395304 823.804 0.263511 823.804 0.583988V2.32325C823.804 2.64376 823.545 2.90426 823.224 2.9043H818.293C818.133 2.9044 818.003 3.03413 818.003 3.19434V145.1C817.992 153.625 815.288 161.63 810.751 168.316C804.699 177.226 793.525 180.566 783.193 179.923C769.497 179.073 758.706 170.492 754.862 157.143C753.096 151.01 752.735 144.665 752.735 137.845V3.25586C752.735 3.09571 752.605 2.96601 752.445 2.96583H747.515C747.195 2.96583 746.935 2.70608 746.934 2.38575L746.933 0.583011C746.933 0.262414 747.193 0.00212555 747.513 0.00195608L772.46 0.00390921Z"/>
+      <path d="M17.0079 4.13184C27.4714 -2.20311 42.9731 -1.55811 54.4334 8.19141C55.3438 8.96598 56.8072 8.47069 56.9763 7.28712L57.9447 0.50098C57.9857 0.215236 58.231 0.00290732 58.5196 0.00293265H60.3372C60.6574 0.00319809 60.9171 0.263613 60.9171 0.583988V31.3438C60.9171 31.6643 60.6567 31.9248 60.3363 31.9248H58.5967C58.2764 31.9248 58.0164 31.6593 58.012 31.3389C57.7545 12.1198 44.832 1.45426 31.9091 1.45411C10.1532 1.45411 6.17482 46.9981 27.7653 70.4131L49.287 93.752C65.2653 111.081 71.0276 135.718 63.3497 158.128C59.9426 168.068 50.3036 179.925 32.7662 179.925C15.2291 179.925 8.70218 172.67 5.8014 172.67C3.40281 172.67 2.98767 177.632 2.91583 179.349C2.90221 179.669 2.64063 179.925 2.32036 179.925H0.579847C0.259656 179.925 0.00012713 179.665 0 179.345V148.584C0 148.264 0.259577 148.003 0.579847 148.003H2.32036C2.64068 148.003 2.90003 148.268 2.90607 148.588C3.24652 167.105 19.717 178.474 32.7662 178.474C41.3361 178.474 46.9044 172.857 50.2846 162.358C56.5998 142.743 51.1053 121.249 36.994 106.238L20.8813 89.0997C13.2517 80.9835 6.79716 72.0578 3.16475 61.2598C-3.02151 42.8558 -1.00397 15.0385 17.0079 4.13184Z"/>
+      <path d="M852.41 4.13184C862.873 -2.20317 878.376 -1.55836 889.836 8.19141C890.747 8.96583 892.209 8.47062 892.378 7.28712L893.348 0.50098C893.389 0.215288 893.633 0.00290732 893.922 0.00293265H895.739C896.06 0.00306634 896.319 0.263532 896.319 0.583988V31.3438C896.319 31.6642 896.06 31.9247 895.739 31.9248H893.999C893.678 31.9248 893.418 31.6593 893.414 31.3389C893.156 12.1197 880.234 1.45413 867.311 1.45411C845.555 1.45411 841.578 46.9982 863.168 70.4131L884.689 93.752C900.667 111.081 906.43 135.718 898.752 158.128C895.345 168.068 885.706 179.925 868.169 179.925C850.632 179.925 844.104 172.67 841.203 172.67C838.805 172.671 838.39 177.632 838.318 179.349C838.304 179.669 838.043 179.925 837.723 179.925H835.983C835.662 179.925 835.402 179.665 835.402 179.345V148.584C835.402 148.264 835.662 148.003 835.983 148.003H837.723C838.043 148.003 838.302 148.268 838.308 148.588C838.648 167.105 855.12 178.474 868.169 178.474C876.739 178.474 882.306 172.857 885.687 162.358C892.002 142.743 886.508 121.249 872.397 106.238L856.284 89.0997C848.655 80.9834 842.199 72.0579 838.567 61.2598C832.381 42.8558 834.398 15.0385 852.41 4.13184Z"/>
+      <path d="M217.265 143.68C217.33 143.99 217.775 143.985 217.834 143.674L245.121 0.00195608H266.296C266.616 0.00195608 266.877 0.261624 266.877 0.582035V2.32325C266.877 2.64379 266.616 2.9043 266.296 2.9043H261.365C261.205 2.9043 261.075 3.03407 261.075 3.19434V176.731C261.075 176.891 261.205 177.022 261.365 177.022H266.296C266.616 177.022 266.877 177.281 266.877 177.602V179.343C266.877 179.663 266.616 179.923 266.296 179.923H241.349C241.029 179.923 240.769 179.663 240.769 179.343V177.602C240.769 177.281 241.029 177.022 241.349 177.022H246.281C246.441 177.022 246.571 176.891 246.571 176.731V20.3965C246.57 20.0455 246.064 19.9963 245.997 20.3408L214.754 179.454C214.701 179.726 214.462 179.923 214.185 179.923H209.337C209.06 179.923 208.822 179.726 208.768 179.454L177.527 20.3428C177.459 19.9983 176.952 20.0475 176.952 20.3985L176.972 176.731C176.972 176.891 177.102 177.022 177.262 177.022H182.173C182.494 177.022 182.753 177.281 182.753 177.602V179.343C182.753 179.663 182.494 179.923 182.173 179.923H167.375C167.054 179.923 166.794 179.663 166.794 179.343V177.599C166.794 177.28 167.051 177.02 167.37 177.018L172.306 176.988C172.466 176.987 172.594 176.858 172.594 176.698V3.19434C172.594 3.03407 172.464 2.9043 172.304 2.9043H167.374C167.053 2.9043 166.793 2.64379 166.793 2.32325V0.582035C166.793 0.261624 167.053 0.00195608 167.374 0.00195608H187.104L217.265 143.68Z"/>
+      <path d="M328.959 143.68C329.024 143.99 329.469 143.985 329.528 143.674L356.815 0.00195608H377.991C378.311 0.00220481 378.57 0.261778 378.571 0.582035V2.32325C378.571 2.64363 378.311 2.90405 377.991 2.9043H373.059C372.899 2.9043 372.769 3.03407 372.769 3.19434V176.731C372.769 176.891 372.899 177.022 373.059 177.022H377.991C378.311 177.022 378.571 177.281 378.571 177.602V179.343C378.571 179.663 378.311 179.923 377.991 179.923H353.044C352.723 179.923 352.463 179.663 352.463 179.343V177.602C352.463 177.281 352.723 177.022 353.044 177.022H357.974C358.135 177.022 358.265 176.891 358.265 176.731V20.3965C358.265 20.0455 357.758 19.9963 357.69 20.3408L326.448 179.454C326.394 179.726 326.156 179.923 325.879 179.923H321.032C320.755 179.923 320.515 179.726 320.462 179.454L289.221 20.3428C289.153 19.9983 288.646 20.0475 288.646 20.3985L288.666 176.731C288.666 176.891 288.796 177.021 288.956 177.022H293.867C294.187 177.022 294.447 177.281 294.447 177.602V179.343C294.447 179.663 294.187 179.923 293.867 179.923H279.068C278.748 179.923 278.489 179.663 278.488 179.343L278.488 177.599C278.487 177.279 278.745 177.02 279.064 177.018L284 176.988C284.159 176.987 284.289 176.858 284.289 176.698V3.19434C284.289 3.03422 284.159 2.90454 283.999 2.9043H279.067C278.747 2.9043 278.488 2.64379 278.488 2.32325V0.582035C278.488 0.261624 278.747 0.00195608 279.067 0.00195608H298.799L328.959 143.68Z"/>
+      <path d="M415.7 0.00195608C416.021 0.00198578 416.28 0.261642 416.28 0.582035V2.32325C416.28 2.64377 416.021 2.90427 415.7 2.9043H410.771C410.61 2.9043 410.481 3.03407 410.481 3.19434V176.731C410.481 176.891 410.61 177.022 410.771 177.022H415.7C416.021 177.022 416.28 177.281 416.28 177.602V179.343C416.28 179.663 416.021 179.923 415.7 179.923H390.753C390.433 179.923 390.174 179.663 390.173 179.343V177.602C390.173 177.281 390.433 177.022 390.753 177.022H395.686C395.846 177.022 395.977 176.891 395.977 176.731V3.19434C395.977 3.03407 395.846 2.9043 395.686 2.9043H390.754C390.434 2.90412 390.175 2.64434 390.174 2.32422L390.173 0.583011C390.173 0.262486 390.433 0.00217354 390.753 0.00195608H415.7Z"/>
+      <path d="M508.527 0.00195608C508.847 0.00195608 509.107 0.261624 509.107 0.582035V31.3428C509.107 31.6633 508.847 31.9239 508.527 31.9239H506.758C506.449 31.9237 506.194 31.6808 506.179 31.3721L505.582 19.4463C505.119 10.1797 497.474 2.90444 488.2 2.9043H476.038C475.877 2.90443 475.748 3.03415 475.748 3.19434V176.731C475.748 176.891 475.877 177.021 476.038 177.022H480.969C481.29 177.022 481.549 177.281 481.549 177.602V179.343C481.549 179.663 481.29 179.923 480.969 179.923H456.022C455.702 179.923 455.442 179.663 455.442 179.343V177.602C455.442 177.281 455.702 177.022 456.022 177.022H460.954C461.114 177.022 461.244 176.891 461.244 176.731V3.19434C461.244 3.03412 461.114 2.90438 460.954 2.9043H448.792C439.517 2.90449 431.872 10.1797 431.409 19.4463L430.812 31.3721C430.797 31.6809 430.543 31.9237 430.234 31.9239H428.465C428.144 31.9238 427.885 31.6633 427.885 31.3428V0.582035C427.885 0.261624 428.144 0.00195608 428.465 0.00195608H508.527Z"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M697.616 0.00195608C722.273 0.00202564 735.327 40.2791 735.327 89.963C735.327 139.647 722.273 179.923 697.616 179.923C672.959 179.923 659.906 139.647 659.906 89.963C659.906 40.2791 672.959 0.00195608 697.616 0.00195608ZM697.616 2.9043C678.761 2.9043 674.41 41.8818 674.41 89.963C674.41 138.044 678.761 177.022 697.616 177.022C716.471 177.022 720.823 138.044 720.823 89.963C720.823 41.8819 716.471 2.90439 697.616 2.9043Z"/>
+      <path d="M979 31.3428C979 31.6633 978.74 31.9239 978.419 31.9239H976.65C976.341 31.9237 976.087 31.6808 976.071 31.3721L975.475 19.4463C975.012 10.1797 967.367 2.90444 958.092 2.9043H934.327C934.167 2.9043 934.037 3.03407 934.037 3.19434V86.7706C934.038 86.9307 934.167 87.0606 934.327 87.0606H949.368C953.839 87.0606 957.583 83.6712 958.028 79.2208L958.642 73.0733C958.672 72.7766 958.922 72.5508 959.22 72.5508H961.015C961.335 72.5508 961.596 72.8105 961.596 73.1309V105.343C961.596 105.663 961.335 105.923 961.015 105.923H959.22C958.922 105.923 958.672 105.697 958.642 105.4L958.028 99.253C957.583 94.8026 953.839 91.4132 949.368 91.4132H934.327C934.167 91.4134 934.037 91.5441 934.037 91.7042V176.731C934.037 176.891 934.167 177.021 934.327 177.022H958.092C967.367 177.022 975.013 169.745 975.476 160.479L976.071 148.553C976.087 148.244 976.342 148.002 976.651 148.002H978.42C978.741 148.002 979 148.262 979 148.582V179.923H914.31C913.99 179.923 913.73 179.663 913.73 179.343V177.602C913.73 177.281 913.99 177.022 914.31 177.022H919.243C919.403 177.022 919.533 176.891 919.533 176.731V3.19434C919.533 3.03407 919.403 2.9043 919.243 2.9043H914.307C913.987 2.9043 913.726 2.64379 913.726 2.32325V0.00781546L913.728 0.00390921L913.732 0.00195608H979V31.3428Z"/>
+      <path d="M626.637 2.95625e-06C626.957 0.000463795 627.216 0.259969 627.216 0.580082V2.32129C627.216 2.64155 626.957 2.90091 626.637 2.90137H622.135C622.038 2.90145 621.951 2.96379 621.921 3.05567L564.238 176.724C564.19 176.869 564.297 177.02 564.451 177.02H568.619C568.939 177.02 569.2 177.279 569.201 177.6V179.341C569.201 179.661 568.939 179.921 568.619 179.921H543.673C543.352 179.921 543.093 179.661 543.093 179.341V177.6C543.093 177.279 543.353 177.02 543.673 177.02H549.357C549.454 177.02 549.54 176.957 549.571 176.865L607.254 3.19727C607.302 3.05168 607.194 2.90137 607.041 2.90137H601.689C601.368 2.90109 601.109 2.64166 601.109 2.32129V0.580082C601.109 0.259857 601.369 0.000281007 601.689 2.95625e-06H626.637Z"/>
+      <path d="M613.254 127.331C613.348 127.048 613.707 126.964 613.917 127.176C614.764 128.032 615.623 128.907 616.484 129.796C616.69 130.01 616.761 130.32 616.667 130.603L601.349 176.724C601.301 176.869 601.409 177.019 601.562 177.02H606.33C606.651 177.02 606.91 177.279 606.91 177.6V179.341C606.91 179.661 606.651 179.921 606.33 179.921H591.536C591.216 179.921 590.956 179.661 590.956 179.341V177.6C590.956 177.279 591.216 177.02 591.536 177.02H596.588C596.685 177.02 596.772 176.957 596.803 176.865L613.254 127.331Z"/>
+      <path d="M600.038 86.793C600.145 86.4726 600.552 86.3777 600.787 86.6202C604.438 90.3857 610.525 96.5907 620.241 106.311C639.55 125.627 640.275 142.875 640.275 155.4C640.275 167.926 629.674 179.622 614.752 179.915C614.431 179.921 614.169 179.66 614.169 179.34V177.599C614.169 177.279 614.431 177.019 614.751 177.011C628.822 176.645 639.55 166.801 639.55 155.4C639.549 143.999 621.816 127.125 611.695 117C605.81 111.113 599.759 105.272 595.724 101.415C595.473 101.175 595.382 100.811 595.492 100.481L600.038 86.793Z"/>
+      <path d="M664.346 2.95625e-06C664.667 5.85956e-05 664.926 0.259719 664.926 0.580082V2.32129C664.926 2.6418 664.667 2.90132 664.346 2.90137H659.247C659.15 2.90137 659.062 2.96373 659.032 3.05567L624.59 106.751C624.495 107.036 624.132 107.119 623.923 106.903L621.369 104.269C621.162 104.055 621.09 103.743 621.184 103.46L654.487 3.19727C654.535 3.05181 654.427 2.90164 654.274 2.90137H649.552C649.232 2.90129 648.971 2.64178 648.971 2.32129V0.580082C648.972 0.259738 649.232 8.89049e-05 649.552 2.95625e-06H664.346Z"/>
+      <path d="M586.032 0.00390921C586.352 -0.000574658 586.611 0.260672 586.611 0.581058V2.32129C586.61 2.64164 586.343 2.90091 586.023 2.90528C566.152 3.17032 558.327 16.8839 558.327 29.0186C558.327 41.6956 564.295 50.3154 582.567 68.8145C582.805 69.0556 582.894 69.4159 582.787 69.7374L578.045 84.0157C577.938 84.3384 577.519 84.4245 577.287 84.1758C558.654 64.1505 557.603 45.8951 557.603 29.0186C557.603 7.56096 572.409 0.205549 586.032 0.00390921Z"/>
+    </svg>
+    <div class="mast-row">
+      <span class="mast-kicker">Daily Industry Briefing</span>
+      <span class="mast-date" id="mast-date"></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1 class="headline">What&rsquo;s moving in your world today.</h1>
+  <p class="lede" id="lede"></p>
+
+  <nav class="tabs" id="tabs"></nav>
+  <main id="content"></main>
+
+  <footer>
+    Refreshed every weekday morning — each item researched and vetted for relevance, no generic feeds.<br>
+    <span class="mark">Summit House Family</span> · internal briefing.
+  </footer>
+</div>
+
+<script>
+const EDITION = "Monday, June 22, 2026";
+
+const AGENCIES = [
+  {
+    "id": "all",
+    "name": "All",
+    "disc": "Everything across the ecosystem, grouped by agency."
+  },
+  {
+    "id": "ecosystem",
+    "name": "Ecosystem News",
+    "disc": "News about our clients across the portfolio — Wynn, Starbucks, Spotify, Dick's, LIV Golf & more."
+  },
+  {
+    "id": "31s",
+    "name": "31South",
+    "disc": "Partnerships & growth marketing — brand, celebrity & influencer deals."
+  },
+  {
+    "id": "bb",
+    "name": "Big Bird",
+    "disc": "The golf-world marketing agency, built by golfers."
+  },
+  {
+    "id": "mer",
+    "name": "Meridian",
+    "disc": "Technology & business transformation — turning tech into operating performance."
+  },
+  {
+    "id": "wp",
+    "name": "Wild Places",
+    "disc": "Branding & design — unconventional paths to unparalleled identities."
+  },
+  {
+    "id": "rit",
+    "name": "Ritual",
+    "disc": "Story-first video production — commercials, branded content & documentary."
+  },
+  {
+    "id": "oust",
+    "name": "Oust",
+    "disc": "Digital & social for the chronically online — entertainment & music lean."
+  }
+];
+
+const ITEMS = {
+  "ecosystem": [
+    {
+      "t": "Wynn Las Vegas Unveils Culinary Lineup and Ticket Packages for Wynn Revelry",
+      "m": "GeneOnline · Jun 22",
+      "u": "https://www.geneonline.com/wynn-las-vegas-announces-culinary-lineup-and-ticket-packages-for-wynn-revelry-event/",
+      "p": "Wynn Revelry, Wynn Las Vegas's new entertainment brand, announces chef partnerships and tiered ticket packages for its debut programming series.",
+      "w": "Wynn is building a distinct entertainment sub-brand on top of the resort. Any team working on Wynn identity, hospitality programming, or sponsorship activation should know the new brand platform taking shape."
+    },
+    {
+      "t": "LA Rams Head Coach Sean McVay Signs Multi-Year Jordan Brand Sneaker Deal",
+      "m": "ESPN · Jun 19",
+      "u": "https://www.espn.com/nfl/story/_/id/45182000/sean-mcvay-jordan-brand-sneaker-deal",
+      "p": "Sean McVay signs a multi-year Jordan Brand partnership to develop signature coaching footwear and apparel, one of the few brand endorsements of this scale ever given to an NFL head coach.",
+      "w": "A Summit House parent client is now embedded in one of the biggest names in sneaker culture. The deal opens new cross-brand storytelling and activation angles for any team working with the Rams."
+    }
+  ],
+  "31s": [
+    {
+      "t": "NBPA Launches Plyrs Untd, a New Commercial Brand Arm to Deal Directly With Brands",
+      "m": "Marketing Dive · Jun 22",
+      "u": "https://www.marketingdive.com/news/how-nba-players-will-deal-directly-with-brands-through-a-new-union-arm/823266/",
+      "p": "The NBA Players Association launches Plyrs Untd, a consumer-facing brand that lets all roughly 450 active NBA players build equity through products, partnerships, and business opportunities -- bypassing traditional agent-only deal structures.",
+      "w": "A new collective infrastructure for NBA player brand deals changes the rules of engagement. Teams working on athlete partnerships should understand the new access model before their brand clients do."
+    },
+    {
+      "t": "Cannes Lions Entertainment for Sport Shortlist: 70 Finalists Show How Brands Build Culture Through Sport, Fandom, Talent, and Gaming",
+      "m": "Roastbrief · Jun 21",
+      "u": "https://roastbrief.us/cannes-lions-2026-unveils-the-entertainment-lions-for-sport-shortlist-featuring-70-finalists-that-show-how-brands-are-using-sport-fandom-talent-gaming-and-live-experiences-to-create-culture/",
+      "p": "Cannes Lions releases 70 Entertainment for Sport shortlist entries -- the year's best brand work using athlete talent, sports fandom, gaming crossovers, and live experiences to build cultural moments.",
+      "w": "This is the annual benchmark for what a brand-sport partnership looks like at the highest creative level. A direct reference for pitching and building the kind of work 31South specializes in."
+    }
+  ],
+  "bb": [
+    {
+      "t": "Wyndham Clark Wins the 2026 US Open at Oakmont, Becoming the First Repeat Champion Since 1989",
+      "m": "ESPN · Jun 22",
+      "u": "https://www.espn.com/golf/story/_/id/45186321/wyndham-clark-wins-2026-us-open",
+      "p": "Wyndham Clark shoots a closing 67 to win the 2026 US Open at Oakmont, becoming the first repeat US Open champion since Curtis Strange in 1989.",
+      "w": "A repeat major champion is a rare brand story. Clark's profile and sponsorship value rise sharply, and any brands in his orbit are now associated with two US Open titles."
+    },
+    {
+      "t": "LIV Golf's Joaquin Niemann Posts Career-Best T7 Finish at the US Open",
+      "m": "LIV Golf · Jun 22",
+      "u": "https://www.livgolf.com/news/niemann-posts-career-best-major-result-us-open-2026",
+      "p": "Joaquin Niemann finishes tied for 7th at Oakmont, his best major result, as several LIV golfers perform strongly against the combined field.",
+      "w": "Strong LIV performance at a major keeps the client's brand narrative alive and strengthens the marketability case for LIV golfers heading into the second half of the season."
+    },
+    {
+      "t": "LIV Golf Tournament Operating Costs Are Being Covered by Saudi PIF Loans, Not Equity Grants",
+      "m": "Reuters · Jun 18",
+      "u": "https://www.reuters.com/sports/golf/liv-golf-tournament-operating-costs-covered-by-pif-loans-2026-06-18/",
+      "p": "Reuters reports that LIV Golf's day-to-day tournament operating costs are funded through loans from the Saudi PIF rather than equity -- clarifying the financial mechanics behind the league's continued operation.",
+      "w": "The distinction between loans and equity matters: it signals the PIF expects repayment and financial sustainability, adding a sharper lens to any planning work tied to LIV Golf's long-term brand footprint."
+    }
+  ],
+  "mer": [
+    {
+      "t": "ArcelorMittal Partners With AWS to Deploy AI, Digital Twins, and Predictive Maintenance Across Global Steel Operations",
+      "m": "SteelOrbis · Jun 22",
+      "u": "https://www.steelorbis.com/steel-news/latest-news/arcelormittal-partners-with-aws-to-accelerate-ai-driven-steelmaking-transformation-1460018.htm",
+      "p": "ArcelorMittal, the world's largest steel producer, announces a strategic collaboration with AWS to roll out AI-driven predictive maintenance, digital twins, real-time process optimization, and computer vision for quality control across plants globally.",
+      "w": "A named global manufacturer committing to a full-stack AI deployment across production infrastructure -- not a pilot, a transformation. The exact kind of story Meridian brings into enterprise client conversations."
+    },
+    {
+      "t": "Schneider Electric and Foxconn Partner to Integrate AI-Driven Energy Management Across Global Manufacturing Operations",
+      "m": "Sustainability Magazine · Jun 22",
+      "u": "https://sustainabilitymag.com/articles/schneider-electric-foxconn-ai-energy-manufacturing-2026",
+      "p": "Schneider Electric and Foxconn announce a partnership combining energy management AI with factory operations to improve efficiency and sustainability across Foxconn's global manufacturing plants.",
+      "w": "Combining energy AI with operational AI inside a factory is a systems-level transformation. Useful context for any Meridian conversations with manufacturing or energy-sector clients about integrated AI deployment."
+    }
+  ],
+  "wp": [
+    {
+      "t": "Cannes Lions Industry Craft Lions Shortlist: 62 Finalists Across Typography, Art Direction, Illustration, Photography, Copywriting, and Brand Design",
+      "m": "Roastbrief · Jun 21",
+      "u": "https://roastbrief.us/cannes-lions-2026-unveils-the-industry-craft-lions-shortlist-featuring-62-finalists-celebrating-excellence-in-typography-art-direction-illustration-photography-copywriting-and-brand-design/",
+      "p": "Cannes Lions releases 62 Industry Craft shortlist entries judged on excellence across the disciplines that define identity and visual communication: typography, art direction, illustration, photography, copywriting, and brand design.",
+      "w": "This is the annual Cannes benchmark for the exact craft disciplines Wild Places works in. A reference list for what exceptional identity and design work looks like right now."
+    },
+    {
+      "t": "Cannes Lions Brand Experience and Activation Lions Shortlist: 158 Finalists Where Brand Identity Meets Activation, Retail, and Immersive Experience",
+      "m": "Roastbrief · Jun 22",
+      "u": "https://roastbrief.us/cannes-lions-2026-unveils-the-brand-experience-activation-lions-shortlist-featuring-158-finalists-that-show-how-brands-are-turning-activations-retail-technology-events-and-immersive-experien/",
+      "p": "The Brand Experience and Activation Lions shortlist brings together 158 entries where brands extend identity into physical and digital space through retail technology, live events, and immersive installations.",
+      "w": "Shows where branding pushes beyond static identity into experience design -- relevant as Wild Places expands the definition of what a brand identity system does in the world."
+    }
+  ],
+  "rit": [
+    {
+      "t": "Cannes Lions Film Craft Lions Shortlist: 147 Entries Celebrating Cinematic Excellence in Direction, Sound, Editing, and the Visual Power of Brands",
+      "m": "Roastbrief · Jun 21",
+      "u": "https://roastbrief.us/cannes-lions-2026-unveils-the-film-craft-lions-shortlist-featuring-147-shortlisted-entries-that-celebrate-cinematic-excellence-production-direction-sound-editing-and-the-visual-power-of-brands/",
+      "p": "Cannes Lions releases 147 Film Craft shortlist entries -- the definitive annual list of the year's best-crafted commercial and branded work, judged on production direction, cinematography, sound design, and editing.",
+      "w": "Film Craft is the most direct Cannes measure of production quality in commercial work. A benchmarking tool for the whole Ritual team to see what's being recognized and how their craft compares."
+    }
+  ],
+  "oust": [
+    {
+      "t": "Meta Launches Live Video Ads, Virtual Cards, and Expanded Affiliate Partnerships in Cannes Commerce Push",
+      "m": "Net Influencer · Jun 19",
+      "u": "https://www.netinfluencer.com/meta-launches-live-video-ads-virtual-cards-and-expanded-affiliate-partnerships-in-cannes-commerce-push/",
+      "p": "Ahead of Cannes Lions, Meta unveils live video advertising formats for brand integrations during live streams, virtual card-based checkout, and expanded affiliate partnerships for creator-driven commerce.",
+      "w": "These Meta updates directly change how Oust structures creator campaigns and paid media. Live shopping and affiliate infrastructure are now core tools in the standard campaign stack."
+    },
+    {
+      "t": "Inside Ad Tech Before Cannes: Agentic AI Buying, the AI Search Squeeze, Streaming TV, and Measurement Trust",
+      "m": "PPC Land · Jun 22",
+      "u": "https://ppcland.com/inside-ad-tech-before-cannes-2026-agents-ai-search-streaming-trust/",
+      "p": "A pre-Cannes breakdown of the four forces reshaping paid media: agentic AI media buying, AI search pulling traffic from brand sites, streaming TV displacing linear, and a growing trust gap in measurement.",
+      "w": "These four shifts are hitting Oust's day-to-day work right now. Knowing the structural changes in paid media helps the whole team anticipate what clients will ask about next."
+    },
+    {
+      "t": "Cannes Lions Creative Data Lions Shortlist: 39 Finalists Where Data Becomes the Creative Engine for Campaigns, Products, and Experiences",
+      "m": "Roastbrief · Jun 22",
+      "u": "https://roastbrief.us/cannes-lions-2026-unveils-the-creative-data-lions-shortlist-featuring-39-finalists-that-show-how-data-is-moving-beyond-informing-ideas-to-become-the-creative-engine-behind-campaigns-products-experi/",
+      "p": "The Creative Data Lions shortlist features 39 entries where data stops being background context and becomes the actual source of campaign ideas, product concepts, and brand experiences.",
+      "w": "Shows what award-winning data-driven creative work looks like at Cannes. Useful for Oust's analytics and thought-leadership work with clients who want data to drive strategy, not just measure it."
+    }
+  ]
+};
+
+const tabsEl = document.getElementById("tabs");
+const contentEl = document.getElementById("content");
+const total = Object.values(ITEMS).reduce((n,a)=>n+a.length,0);
+document.getElementById("mast-date").textContent = EDITION;
+document.getElementById("lede").textContent =
+  "Your ecosystem, one pulse. " + total + " stories researched and tied back to what each team is actually selling.";
+
+/* ---- Motion (GSAP): refined + smooth; degrades gracefully if GSAP is blocked or reduced-motion is on ---- */
+const HAS_GSAP = !!window.gsap;
+let reduceMotion = false;
+try { reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){}
+const ANIMATE = HAS_GSAP && !reduceMotion;
+let underline = null;       // sliding active-tab indicator
+let firstPaint = true;
+
+function moveUnderline(animate){
+  if (!underline) return;
+  const active = tabsEl.querySelector(".tab.active");
+  if (!active) return;
+  const x = active.offsetLeft, y = active.offsetTop + active.offsetHeight - 2, w = active.offsetWidth;
+  if (ANIMATE && animate) gsap.to(underline, { x: x, y: y, width: w, duration: 0.75, ease: "power4.out", overwrite: true });
+  else if (HAS_GSAP) gsap.set(underline, { x: x, y: y, width: w });
+  else { underline.style.transform = "translate(" + x + "px," + y + "px)"; underline.style.width = w + "px"; }
+}
+
+function attachCardHovers(){
+  if (!ANIMATE) return;
+  gsap.utils.toArray("#content .card").forEach(function(card){
+    card.addEventListener("mouseenter", function(){
+      gsap.to(card, { y: -4, boxShadow: "0 18px 38px -22px rgba(6,6,6,.34)", duration: 0.55, ease: "power3.out", overwrite: true });
+    });
+    card.addEventListener("mouseleave", function(){
+      gsap.to(card, { y: 0, boxShadow: "0 0px 0px 0px rgba(6,6,6,0)", duration: 0.7, ease: "power3.out", overwrite: true });
+    });
+  });
+}
+
+function revealCards(){
+  if (!ANIMATE) return;
+  const cards = gsap.utils.toArray("#content .card");
+  gsap.killTweensOf(cards);
+  // smooth staggered entrance that always completes — no dependency on scroll position
+  gsap.from(cards, { opacity: 0, y: 22, duration: 0.85, ease: "power3.out",
+    stagger: { amount: Math.min(0.7, cards.length * 0.06) }, clearProps: "opacity,transform", overwrite: true });
+}
+
+function afterRender(){
+  moveUnderline(!firstPaint);
+  firstPaint = false;
+  attachCardHovers();
+  revealCards();
+}
+
+// ---- Config (set after deploying the Apps Script web app) ----
+// Paste the web app /exec URL here to send every vote to the shared Google Sheet.
+const FEEDBACK_URL = "https://script.google.com/macros/s/AKfycbyFo81pj3qj2LpCQTDDoV7f7nBKu3mtXwAhe_36WFgiJxEj6jdsVpYAGY2oe5PGPg95/exec";
+
+// ---- Feedback loop (trains future editions) ----
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48); }
+function fbStore(){ try { return JSON.parse(localStorage.getItem("sh_brief_fb")||"{}"); } catch(e){ return {}; } }
+function fbSave(o){ try { localStorage.setItem("sh_brief_fb", JSON.stringify(o)); } catch(e){} }
+function recordFeedback(fid, agency, title, source, vote){
+  const store = fbStore();
+  const prev = store[fid] && store[fid].vote;
+  store[fid] = { agency: agency, title: title, source: source, vote: (prev===vote? null : vote), ts: Date.now() };
+  fbSave(store);
+  // Send to the shared Google Sheet (via the Apps Script web app) so the daily
+  // run can read aggregated signal and tune sources/topics per agency over time.
+  if (FEEDBACK_URL) {
+    try {
+      const body = new URLSearchParams({ agency: agency, title: title, source: (source||"").split(" · ")[0], vote: store[fid].vote||"clear", ts: String(Date.now()) });
+      fetch(FEEDBACK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() });
+    } catch(e) {}
+  }
+  return store[fid].vote;
+}
+
+function cardHTML(it, agencyId) {
+  const fid = agencyId + "|" + slug(it.t);
+  const cur = (fbStore()[fid]||{}).vote;
+  return '<article class="card">' +
+    '<div class="meta">' + it.m + '</div>' +
+    '<h3><a href="' + it.u + '" target="_blank" rel="noopener">' + it.t + '</a></h3>' +
+    '<p>' + it.p + '</p>' +
+    '<div class="why">' + it.w + '</div>' +
+    '<div class="fb" data-fid="' + fid + '" data-agency="' + agencyId + '" data-src="' + (it.m||"") + '" data-title="' + it.t.replace(/"/g,"&quot;") + '">' +
+      '<span class="fb-q">Useful for your team?</span>' +
+      '<button class="fb-btn up' + (cur==="up"?" active":"") + '" data-v="up">More like this</button>' +
+      '<button class="fb-btn down' + (cur==="down"?" active":"") + '" data-v="down">Less</button>' +
+      '<span class="fb-thanks"></span>' +
+    '</div>' +
+  '</article>';
+}
+
+function render(id) {
+  const ag = AGENCIES.find(a => a.id === id);
+  let html = '<div class="agency-head"><h2>' + ag.name + '</h2><div class="disc">' + ag.disc + '</div></div>';
+  if (id === "all") {
+    AGENCIES.filter(a => a.id !== "all").forEach(a => {
+      html += '<div class="group-label">' + a.name + '</div>';
+      (ITEMS[a.id] || []).forEach(it => html += cardHTML(it, a.id));
+    });
+  } else {
+    (ITEMS[id] || []).forEach(it => html += cardHTML(it, id));
+  }
+  contentEl.innerHTML = html;
+  document.querySelectorAll(".tab").forEach(t =>
+    t.classList.toggle("active", t.dataset.id === id));
+  try { localStorage.setItem("sh_brief_tab", id); } catch(e) {}
+  afterRender();   // Option A: no scroll jump — content swaps in place; the sticky tab bar stays put
+}
+
+AGENCIES.forEach(a => {
+  const b = document.createElement("button");
+  b.className = "tab"; b.dataset.id = a.id;
+  const cnt = a.id === "all" ? "" : '<span class="cnt">' + (ITEMS[a.id]||[]).length + '</span>';
+  b.innerHTML = a.name + cnt;
+  b.onclick = () => {
+    if (ANIMATE) gsap.fromTo(b, { scale: 0.96 }, { scale: 1, duration: 0.55, ease: "power3.out" });
+    render(a.id);
+  };
+  tabsEl.appendChild(b);
+});
+
+// sliding active-tab indicator (positioned by moveUnderline)
+underline = document.createElement("span");
+underline.className = "tab-underline";
+tabsEl.appendChild(underline);
+
+// sticky tab bar: fade a shadow in only once it pins to the top
+const setStuck = () => tabsEl.classList.toggle("stuck", tabsEl.getBoundingClientRect().top <= 0);
+window.addEventListener("scroll", setStuck, { passive: true });
+setStuck();
+
+// realign the underline if the tabs reflow/wrap on resize
+let _rT;
+window.addEventListener("resize", () => {
+  clearTimeout(_rT);
+  _rT = setTimeout(() => { moveUnderline(false); }, 120);
+});
+
+contentEl.addEventListener("click", function(e){
+  const btn = e.target.closest(".fb-btn");
+  if (!btn) return;
+  const row = btn.closest(".fb");
+  const vote = recordFeedback(row.dataset.fid, row.dataset.agency, row.dataset.title, row.dataset.src, btn.dataset.v);
+  row.querySelectorAll(".fb-btn").forEach(b => b.classList.toggle("active", b.dataset.v === vote));
+  row.querySelector(".fb-thanks").textContent =
+    vote === "up" ? "Got it — more like this." : vote === "down" ? "Noted — we'll dial it back." : "";
+  if (ANIMATE && vote) gsap.fromTo(btn, { scale: 0.85 }, { scale: 1, duration: 0.6, ease: "power3.out" });
+});
+
+let start = "all";
+try { const s = localStorage.getItem("sh_brief_tab"); if (s && AGENCIES.some(a=>a.id===s)) start = s; } catch(e) {}
+render(start);
+</script>
+</body>
+</html>
